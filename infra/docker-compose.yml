@@ -1,0 +1,46 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: senior_qa
+      POSTGRES_USER: senior_qa
+      POSTGRES_PASSWORD: local_dev_value
+    volumes:
+      - senior_qa_pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U senior_qa -d senior_qa"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api:
+    build:
+      context: ../backend
+    env_file:
+      - ../example.env
+    environment:
+      DATABASE_URL: postgresql+psycopg2://senior_qa:local_dev_value@db:5432/senior_qa
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    volumes:
+      - senior_qa_uploads:/data/uploads
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ../frontend
+    environment:
+      VITE_API_BASE_URL: http://localhost:8000
+    ports:
+      - "5173:5173"
+    depends_on:
+      - api
+
+volumes:
+  senior_qa_pgdata:
+  senior_qa_uploads:
