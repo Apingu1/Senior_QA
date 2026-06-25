@@ -19,7 +19,7 @@ services:
     build:
       context: ../backend
     env_file:
-      - ../example.env
+      - ../.env
     environment:
       DATABASE_URL: postgresql+psycopg2://senior_qa:local_dev_value@db:5432/senior_qa
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
