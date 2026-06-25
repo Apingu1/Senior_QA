@@ -10,7 +10,7 @@ It is designed as a **GxP-supporting draft and decision-support tool**, not as t
 - PostgreSQL database
 - React/TypeScript frontend
 - Docker Compose stack
-- Login/RBAC baseline
+- Login/session baseline
 - Knowledge base document upload
 - PDF/DOCX/TXT text extraction
 - Document chunking and searchable knowledge base
@@ -21,7 +21,7 @@ It is designed as a **GxP-supporting draft and decision-support tool**, not as t
 - Human review queue
 - Agent run/audit log
 - Autonomous scheduled worker for open tasks
-- Safe fallback drafting mode when no OpenAI API key is configured
+- Safe fallback drafting mode when no AI API value is configured
 
 ## Intended operating model
 
@@ -44,35 +44,41 @@ The AI must not approve, close, release, reject, or make final GMP decisions.
 ## Quick start
 
 ```bash
-cp .env.example .env
-# add OPENAI_API_KEY if you want live AI drafting
-
+cp example.env .env
 docker compose -f infra/docker-compose.yml up --build
 ```
 
 Then open:
 
 - Frontend: http://localhost:5173
-- API docs: http://localhost:8080/docs
+- API docs: http://localhost:8000/docs
+- Health check: http://localhost:8000/health
 
-Default login from `.env.example`:
+Default local login is defined in `example.env`.
 
-- Username: `admin`
-- Password: `ChangeMe123!`
-
-Change these before any real use.
+Change the default admin password and local development values before any real use.
 
 ## Main modules
 
 ```text
-backend/app/auth          Login and current-user endpoints
-backend/app/documents     Upload and search SOPs/forms/guidance
-backend/app/tasks         Task board and AI task execution
-backend/app/questions     Missing-information workflow
-backend/app/reviews       Draft output review workflow
-backend/app/audit         Event/run logging
-frontend/src              React dashboard and user interface
+backend/app/main.py       FastAPI app, models, task engine, document indexing and agent worker
+frontend/src/App.tsx      React dashboard and workflow screens
+frontend/src/styles.css   UI styling
+infra/docker-compose.yml  Local development stack
+docs/Phase_3_Runbook.md   Setup and operating runbook
+docs/System_Design.md     Architecture and workflow design
 ```
+
+## How the autonomous part works
+
+The background worker starts with the API and periodically checks tasks in these statuses:
+
+- New
+- Assigned to AI
+- In Progress
+- Returned for Rework
+
+It will stop and ask questions if key information is missing. When questions are answered, the task is returned to the AI queue. When a draft is produced, the task moves to human review.
 
 ## Important compliance note
 
