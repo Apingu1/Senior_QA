@@ -1,7 +1,7 @@
 import { FormEvent, ReactNode, useEffect, useMemo, useState } from 'react'
 import './styles.css'
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+const API_BASE = ''
 
 type User = { id: number; username: string; full_name: string; role: string }
 type AgentRun = { id: number; run_type: string; status: string; summary: string; started_at: string; finished_at?: string }
